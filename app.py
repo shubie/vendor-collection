@@ -5,10 +5,12 @@ import io
 import os
 import re
 import uuid
+from functools import wraps
 
 from flask import Flask, Response, abort, flash, redirect, render_template, request, send_from_directory, session, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
+from werkzeug.security import check_password_hash
 from werkzeug.utils import secure_filename
 
 
@@ -78,6 +80,8 @@ SERVICE_OPTIONS = {
     "SecurePath Basic - Dubai",
     "SecurePath Basic - Sharjah",
 }
+ADMIN_SEED_EMAIL = "zainudheen.f@emcode.ae"
+ADMIN_SEED_PASSWORD_HASH = "scrypt:32768:8:1$ciuzHRywQ9xUYpYf$7dc58b74960773596b35158b3b1a7e9f5bb992a83917eef18231cf6ae61944e8e857e8508e31fc8fe7b210c66878524911663fb1aeedfc8546dc825c5e62296c"
 PUBLIC_EMAIL_DOMAINS = {
     "gmail.com",
     "yahoo.com",
@@ -156,6 +160,45 @@ class VendorApplication(db.Model):
     authorized_person_emirates_id_file = db.Column(db.String(500), nullable=False)
     company_profile = db.Column(db.String(500), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class AdminUser(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), unique=True, nullable=False, index=True)
+    password_hash = db.Column(db.String(500), nullable=False)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+
+def is_admin_authenticated() -> bool:
+    admin_user_id = session.get("admin_user_id")
+    if not admin_user_id:
+        return False
+    admin_user = AdminUser.query.filter_by(id=admin_user_id, is_active=True).first()
+    if not admin_user:
+        session.pop("admin_user_id", None)
+        return False
+    return True
+
+
+def admin_login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if not is_admin_authenticated():
+            return redirect(url_for("admin_login", next=request.path))
+        return view_func(*args, **kwargs)
+
+    return wrapped_view
+
+
+@app.before_request
+def enforce_admin_authentication():
+    if request.path.startswith("/admin/login"):
+        return None
+    if request.path.startswith("/admin") or request.path.startswith("/uploads/"):
+        if not is_admin_authenticated():
+            return redirect(url_for("admin_login", next=request.path))
+    return None
 
 
 def build_vendor_identification(trade_number: str, trade_name: str) -> str:
@@ -263,6 +306,24 @@ def remember_form_data():
     session["form_data"] = request.form.to_dict()
 
 
+def ensure_admin_seed():
+    existing_admin = AdminUser.query.filter_by(email=ADMIN_SEED_EMAIL).first()
+    if existing_admin:
+        if existing_admin.password_hash != ADMIN_SEED_PASSWORD_HASH:
+            existing_admin.password_hash = ADMIN_SEED_PASSWORD_HASH
+        if not existing_admin.is_active:
+            existing_admin.is_active = True
+        db.session.commit()
+        return
+    admin = AdminUser(
+        email=ADMIN_SEED_EMAIL,
+        password_hash=ADMIN_SEED_PASSWORD_HASH,
+        is_active=True,
+    )
+    db.session.add(admin)
+    db.session.commit()
+
+
 def build_export_response(delimiter: str, filename: str, mimetype: str) -> Response:
     applications = VendorApplication.query.order_by(VendorApplication.created_at.desc()).all()
     output = io.StringIO()
@@ -290,6 +351,14 @@ def build_export_response(delimiter: str, filename: str, mimetype: str) -> Respo
 def vendor_form():
     form_data = session.pop("form_data", {})
     return render_template("vendor_form.html", form_data=form_data)
+
+
+@app.route("/submission-success", methods=["GET"])
+def submission_success():
+    vendor_identification = session.pop("last_submitted_vendor_id", "")
+    if not vendor_identification:
+        return redirect(url_for("vendor_form"))
+    return render_template("submission_success.html", vendor_identification=vendor_identification)
 
 
 @app.route("/submit", methods=["POST"])
@@ -344,34 +413,66 @@ def submit_application():
     db.session.add(application)
     db.session.commit()
     session.pop("form_data", None)
-
-    flash(f"Application submitted successfully. Vendor ID: {vendor_identification}", "success")
-    return redirect(url_for("vendor_form"))
+    session["last_submitted_vendor_id"] = vendor_identification
+    return redirect(url_for("submission_success"))
 
 
 @app.route("/admin/applications", methods=["GET"])
+@admin_login_required
 def admin_list():
     applications = VendorApplication.query.order_by(VendorApplication.created_at.desc()).all()
     return render_template("admin_list.html", applications=applications)
 
 
 @app.route("/admin/applications/<int:application_id>", methods=["GET"])
+@admin_login_required
 def admin_detail(application_id: int):
     application = VendorApplication.query.get_or_404(application_id)
     return render_template("admin_detail.html", application=application)
 
 
 @app.route("/admin/applications/export/csv", methods=["GET"])
+@admin_login_required
 def export_applications_csv():
     return build_export_response(",", "vendor_applications.csv", "text/csv; charset=utf-8")
 
 
 @app.route("/admin/applications/export/excel", methods=["GET"])
+@admin_login_required
 def export_applications_excel():
     return build_export_response("\t", "vendor_applications.xls", "application/vnd.ms-excel")
 
 
+@app.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    if is_admin_authenticated():
+        return redirect(url_for("admin_list"))
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        password = request.form.get("password", "")
+        next_url = request.form.get("next", "").strip()
+        admin_user = AdminUser.query.filter_by(email=email, is_active=True).first()
+        if not admin_user or not check_password_hash(admin_user.password_hash, password):
+            flash("Invalid admin credentials.", "error")
+            return render_template("admin_login.html", next_url=next_url, email=email)
+        session["admin_user_id"] = admin_user.id
+        flash("Signed in successfully.", "success")
+        if next_url and next_url.startswith("/"):
+            return redirect(next_url)
+        return redirect(url_for("admin_list"))
+    return render_template("admin_login.html", next_url=request.args.get("next", ""), email="")
+
+
+@app.route("/admin/logout", methods=["POST"])
+@admin_login_required
+def admin_logout():
+    session.pop("admin_user_id", None)
+    flash("Signed out successfully.", "success")
+    return redirect(url_for("admin_login"))
+
+
 @app.route("/uploads/<path:filepath>", methods=["GET"])
+@admin_login_required
 def uploaded_file(filepath: str):
     full_path = UPLOAD_ROOT / filepath
     if not full_path.exists():
@@ -382,6 +483,7 @@ def uploaded_file(filepath: str):
 with app.app_context():
     db.create_all()
     ensure_sqlite_schema_columns()
+    ensure_admin_seed()
 
 
 if __name__ == "__main__":

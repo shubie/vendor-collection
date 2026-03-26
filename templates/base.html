@@ -11,9 +11,16 @@
   <main class="container py-4 py-md-5">
     <header class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="h4 m-0 text-accent">Vendor Onboarding Portal</h1>
-      <nav class="d-flex gap-3">
+      <nav class="d-flex gap-3 align-items-center">
         <a href="{{ url_for('vendor_form') }}" class="link-nav">Submit Application</a>
-        <a href="{{ url_for('admin_list') }}" class="link-nav">View Applications</a>
+        {% if session.get("admin_user_id") %}
+          <a href="{{ url_for('admin_list') }}" class="link-nav">View Applications</a>
+          <form method="post" action="{{ url_for('admin_logout') }}" class="m-0">
+            <button type="submit" class="btn btn-sm btn-outline-light">Logout</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('admin_login') }}" class="link-nav">Admin Login</a>
+        {% endif %}
       </nav>
     </header>
     {% with messages = get_flashed_messages(with_categories=true) %}
