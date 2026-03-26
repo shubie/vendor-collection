@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card-glass p-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="h4 text-accent m-0">Application {{ application.vendor_identification }}</h2>
+    <a href="{{ url_for('admin_list') }}" class="btn btn-outline-light btn-sm">Back</a>
+  </div>
+  <div class="row g-3">
+    <div class="col-md-6"><strong>Trade name:</strong> {{ application.trade_name }}</div>
+    <div class="col-md-6"><strong>Trade number:</strong> {{ application.trade_number }}</div>
+    <div class="col-md-6"><strong>Service:</strong> {{ application.services_applying }}</div>
+    <div class="col-md-6"><strong>Owner email ID:</strong> {{ application.owner_email_id }}</div>
+    <div class="col-md-6"><strong>Authorized contact:</strong> {{ application.first_name }} {{ application.last_name }}</div>
+    <div class="col-md-6"><strong>Email address:</strong> {{ application.email_address }}</div>
+    <div class="col-md-6"><strong>Contact number:</strong> {{ application.contact_number }}</div>
+    <div class="col-md-6"><strong>Emirates ID:</strong> {{ application.emirates_id }}</div>
+    <div class="col-md-6"><strong>Street:</strong> {{ application.street }}</div>
+    <div class="col-md-3"><strong>Country:</strong> {{ application.country }}</div>
+    <div class="col-md-3"><strong>State/Emirate:</strong> {{ application.state_emirate }}</div>
+    <div class="col-md-3"><strong>City:</strong> {{ application.city }}</div>
+    <div class="col-md-3"><strong>P.O. box:</strong> {{ application.po_box or "-" }}</div>
+    <div class="col-md-6"><strong>Makani number:</strong> {{ application.makani_number or "-" }}</div>
+    <div class="col-md-6"><strong>Year of company establishment in UAE:</strong> {{ application.year_company_establishment_uae }}</div>
+    <div class="col-md-6"><strong>Experience in GPS tracking (Years):</strong> {{ application.experience_gps_tracking_years }}</div>
+    <div class="col-md-6"><strong>Vehicles with GPS tracking in UAE:</strong> {{ application.running_vehicles_installed_uae }}</div>
+    <div class="col-md-6"><strong>Vehicles with GPS tracking outside UAE:</strong> {{ application.running_vehicles_installed_outside_uae }}</div>
+    <div class="col-md-6"><strong>Number of Engineers:</strong> {{ application.number_of_engineers }}</div>
+    <div class="col-md-6"><strong>Number of Technicians:</strong> {{ application.number_of_technicians }}</div>
+  </div>
+
+  <hr class="border-secondary my-4">
+  <h3 class="h5 text-accent mb-3">Uploaded documents</h3>
+  <div class="row g-2">
+    {% if application.vendor_logo %}
+      <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.vendor_logo) }}">Vendor logo / profile photo</a></div>
+    {% endif %}
+    <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.trade_license) }}">Trade license</a></div>
+    <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.trn_certificate) }}">TRN certificate</a></div>
+    <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.tdra_certificate) }}">TDRA certificate</a></div>
+    <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.sira_certificate) }}">SIRA certificate</a></div>
+    <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.authorized_person_emirates_id_file) }}">Authorized person Emirates ID</a></div>
+    <div class="col-md-6"><a class="btn btn-outline-light w-100" target="_blank" href="{{ url_for('uploaded_file', filepath=application.company_profile) }}">Company profile</a></div>
+  </div>
+</section>
+{% endblock %}

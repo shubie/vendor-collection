@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card-glass p-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h2 class="h4 text-accent m-0">Submitted applications</h2>
+    <div class="d-flex gap-2">
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('export_applications_csv') }}">Export CSV</a>
+      <a class="btn btn-sm btn-outline-light" href="{{ url_for('export_applications_excel') }}">Export Excel</a>
+    </div>
+  </div>
+  {% if not applications %}
+    <p class="text-secondary m-0">No applications submitted yet.</p>
+  {% else %}
+    <div class="table-responsive">
+      <table class="table table-dark table-striped align-middle">
+        <thead>
+          <tr>
+            <th>Vendor ID</th>
+            <th>Trade name</th>
+            <th>Trade number</th>
+            <th>Email</th>
+            <th>Submitted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in applications %}
+            <tr>
+              <td>{{ item.vendor_identification }}</td>
+              <td>{{ item.trade_name }}</td>
+              <td>{{ item.trade_number }}</td>
+              <td>{{ item.email_address }}</td>
+              <td>{{ item.created_at.strftime("%Y-%m-%d %H:%M") }}</td>
+              <td><a class="btn btn-sm btn-outline-light" href="{{ url_for('admin_detail', application_id=item.id) }}">View</a></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

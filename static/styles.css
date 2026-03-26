@@ -1,0 +1,275 @@
+:root {
+  --bg: #0a0f17;
+  --panel: #101722;
+  --muted: #98a2b3;
+  --accent: #00c983;
+  --border: #1f2a37;
+}
+
+body {
+  background: radial-gradient(circle at top, #131d2e 0%, #0a0f17 65%);
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+main.container {
+  max-width: 1180px;
+}
+
+/* ── Glass card ───────────────────────────────────────── */
+.card-glass {
+  background: rgba(16, 23, 34, 0.92);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Typography helpers ───────────────────────────────── */
+.text-accent {
+  color: var(--accent);
+}
+
+.text-secondary {
+  color: var(--muted) !important;
+}
+
+/* ── Form labels & hint text ──────────────────────────── */
+.form-label {
+  font-weight: 600;
+  font-size: 0.925rem;
+  color: #dfe4ea;
+  margin-bottom: 0.15rem;
+}
+
+.form-hint {
+  display: block;
+  font-size: 0.8125rem;
+  color: #6b7a8d;
+  margin-bottom: 0.5rem;
+  line-height: 1.35;
+}
+
+/* ── Inputs & selects ─────────────────────────────────── */
+.form-control,
+.form-select {
+  background-color: #0d141f;
+  color: #e5e7eb;
+  border: 1px solid #2a3647;
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.9375rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control::placeholder {
+  color: #4d5b6e;
+}
+
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 0.2rem rgba(0, 201, 131, 0.15);
+  background-color: #0d141f;
+  color: #e5e7eb;
+}
+
+.form-control::file-selector-button {
+  background: #111b2b;
+  color: #dbeafe;
+  border: 0;
+  margin-right: 1rem;
+}
+
+.form-select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7a8d' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+.btn-accent {
+  background: var(--accent);
+  color: #00130c;
+  border: 1px solid #00be7b;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.btn-accent:hover {
+  background: #00b975;
+  color: #00130c;
+  transform: translateY(-1px);
+}
+
+.btn-accent:active {
+  transform: translateY(0);
+}
+
+/* ── Links ────────────────────────────────────────────── */
+.link-nav {
+  color: #d1d5db;
+  text-decoration: none;
+}
+
+.link-nav:hover {
+  color: var(--accent);
+}
+
+/* ── Table ────────────────────────────────────────────── */
+.table {
+  border-color: #243244;
+}
+
+/* ── Form shell ───────────────────────────────────────── */
+.vendor-form-shell {
+  max-width: 980px;
+}
+
+/* ── Upload card (shared) ─────────────────────────────── */
+.upload-card {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid #344257;
+  background: #101722;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+  position: relative;
+}
+
+.upload-card::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 2px dashed #3b4658;
+  border-radius: 12px;
+  pointer-events: none;
+  transition: border-color 0.25s ease;
+}
+
+.upload-card:hover {
+  border-color: #4b5f78;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  transform: translateY(-1px);
+}
+
+.upload-card:hover::before {
+  border-color: #56687e;
+}
+
+.upload-card.is-selected {
+  border-color: #00c983;
+  box-shadow: 0 0 0 2px rgba(0, 201, 131, 0.18);
+}
+
+.upload-card.is-selected::before {
+  border-color: #00c983;
+}
+
+.upload-card.is-selected .upload-note {
+  color: #00d28a;
+  font-weight: 600;
+}
+
+/* ── Logo upload variant ──────────────────────────────── */
+.upload-card-logo {
+  min-height: 220px;
+  padding: 34px 20px;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+/* ── Document upload variant ──────────────────────────── */
+.upload-card-doc {
+  min-height: 90px;
+  padding: 18px 24px;
+}
+
+/* ── Upload icon ──────────────────────────────────────── */
+.upload-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #0d1727;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #22b3ff;
+  font-size: 16px;
+  line-height: 1;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.upload-icon svg {
+  display: block;
+}
+
+.upload-icon-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;
+  font-size: 30px;
+  background: transparent;
+  color: #95a2b5;
+}
+
+.upload-icon-lg svg {
+  width: 36px;
+  height: 36px;
+}
+
+/* ── Upload text ──────────────────────────────────────── */
+.upload-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 1;
+}
+
+.upload-line {
+  font-size: 0.9375rem;
+  color: #eef2f7;
+  z-index: 1;
+}
+
+.upload-strong {
+  font-weight: 700;
+  color: #f8fafc;
+  z-index: 1;
+}
+
+.upload-link {
+  color: #00a6ff;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.upload-note {
+  font-size: 0.8125rem;
+  color: #6b7a8d;
+  z-index: 1;
+}
+
+/* ── Section headings inside form ─────────────────────── */
+.vendor-form-shell h3.h5 {
+  border-top: 1px solid var(--border);
+  padding-top: 1rem;
+}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 991px) {
+  .upload-card-logo {
+    min-height: 180px;
+  }
+
+  .upload-line {
+    font-size: 0.875rem;
+  }
+
+  .upload-note {
+    font-size: 0.8rem;
+  }
+}
