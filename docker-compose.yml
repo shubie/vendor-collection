@@ -1,0 +1,16 @@
+services:
+  vendor-portal:
+    build: .
+    container_name: vendor-portal
+    ports:
+      - "5000:5000"
+    environment:
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+    volumes:
+      - vendor_instance:/app/instance
+      - vendor_uploads:/app/uploads
+    restart: unless-stopped
+
+volumes:
+  vendor_instance:
+  vendor_uploads:
